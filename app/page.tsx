@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { ThemeProvider } from 'next-themes'
 import { SidebarComponent } from '@/components/SidebarComponent'
 import { Dashboard } from '@/components/Dashboard'
