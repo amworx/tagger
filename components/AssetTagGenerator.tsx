@@ -107,7 +107,7 @@ export function AssetTagGenerator() {
                 </div>
               </>
             )}
-            <Button onClick={generateTag}>Generate Tag</Button>
+            <Button onClick={generateTag} className="w-full">Generate Tag</Button>
           </div>
         </CardContent>
       </Card>

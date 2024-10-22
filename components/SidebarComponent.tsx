@@ -17,7 +17,7 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
   ]
 
   return (
-    <div className={`bg-secondary h-full ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
+    <div className={`bg-gray-800 text-white h-full ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
       <div className="flex flex-col h-full">
         <div className="p-4">
           <h1 className={`text-xl font-bold ${collapsed ? 'hidden' : ''}`}>Tagger</h1>
@@ -27,7 +27,7 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
             <Button
               key={item.section}
               variant="ghost"
-              className={`w-full justify-start ${activeSection === item.section ? 'bg-primary/10' : ''}`}
+              className={`w-full justify-start py-2 ${activeSection === item.section ? 'bg-gray-700' : ''}`}
               onClick={() => setActiveSection(item.section)}
             >
               {item.icon}
@@ -37,7 +37,7 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
         </nav>
         <div className="p-4">
           <UserProfile collapsed={collapsed} />
-          <Button variant="ghost" className="w-full justify-start" onClick={() => setCollapsed(!collapsed)}>
+          <Button variant="ghost" className="w-full justify-start mt-2" onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             {!collapsed && <span className="ml-2">Collapse</span>}
           </Button>
@@ -103,7 +103,7 @@ function UserProfile({ collapsed }: { collapsed: boolean }) {
           </form>
         </DialogContent>
       </Dialog>
-      <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+      <Button variant="ghost" className="w-full justify-start mt-2" onClick={handleLogout}>
         <LogOut className="h-4 w-4" />
         {!collapsed && <span className="ml-2">Logout</span>}
       </Button>
