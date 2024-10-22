@@ -4,6 +4,15 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@/components/ui/sidebar'
 
 export function SidebarComponent({ setActiveSection, activeSection }: { setActiveSection: (section: string) => void, activeSection: string }) {
   const [collapsed, setCollapsed] = useState(false)
@@ -17,33 +26,33 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
   ]
 
   return (
-    <div className={`bg-gray-900 text-white h-full ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
-      <div className="flex flex-col h-full">
-        <div className="p-4 border-b border-gray-700">
-          <h1 className={`text-xl font-bold ${collapsed ? 'hidden' : ''}`}>Tagger</h1>
-        </div>
-        <nav className="flex-1">
+    <Sidebar className={`transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+      <SidebarHeader>
+        <h1 className={`text-xl font-bold p-4 ${collapsed ? 'hidden' : ''}`}>Tagger</h1>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
           {menuItems.map((item) => (
-            <Button
-              key={item.section}
-              variant="ghost"
-              className={`w-full justify-start py-2 ${activeSection === item.section ? 'bg-gray-800' : ''}`}
-              onClick={() => setActiveSection(item.section)}
-            >
-              {item.icon}
-              {!collapsed && <span className="ml-2">{item.label}</span>}
-            </Button>
+            <SidebarMenuItem key={item.section}>
+              <SidebarMenuButton 
+                onClick={() => setActiveSection(item.section)}
+                active={activeSection === item.section}
+              >
+                {item.icon}
+                {!collapsed && <span className="ml-2">{item.label}</span>}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           ))}
-        </nav>
-        <div className="p-4 border-t border-gray-700">
-          <UserProfile collapsed={collapsed} />
-          <Button variant="ghost" className="w-full justify-start mt-2" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            {!collapsed && <span className="ml-2">Collapse</span>}
-          </Button>
-        </div>
-      </div>
-    </div>
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter>
+        <UserProfile collapsed={collapsed} />
+        <Button variant="ghost" className="w-full justify-start" onClick={() => setCollapsed(!collapsed)}>
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {!collapsed && <span className="ml-2">Collapse</span>}
+        </Button>
+      </SidebarFooter>
+    </Sidebar>
   )
 }
 
@@ -103,7 +112,7 @@ function UserProfile({ collapsed }: { collapsed: boolean }) {
           </form>
         </DialogContent>
       </Dialog>
-      <Button variant="ghost" className="w-full justify-start mt-2" onClick={handleLogout}>
+      <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
         <LogOut className="h-4 w-4" />
         {!collapsed && <span className="ml-2">Logout</span>}
       </Button>
