@@ -38,7 +38,7 @@ export default function Tagger() {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="flex h-screen bg-background text-foreground">
         <SidebarComponent setActiveSection={setActiveSection} activeSection={activeSection} />
         <main className="flex-1 overflow-y-auto p-6">
