@@ -29,7 +29,7 @@ export function AssetTagGenerator() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-gray-800 text-white">
         <CardHeader>
           <CardTitle>Asset Tag Generator</CardTitle>
         </CardHeader>
@@ -41,6 +41,7 @@ export function AssetTagGenerator() {
                 id="assetCategory"
                 value={assetCategory}
                 onValueChange={(value: AssetCategory) => setAssetCategory(value)}
+                className="bg-gray-700 text-white"
               >
                 <option value="office">Office Asset</option>
                 <option value="employee">Employee-held Asset</option>
@@ -53,6 +54,7 @@ export function AssetTagGenerator() {
                 value={assetNumber}
                 onChange={(e) => setAssetNumber(e.target.value)}
                 placeholder="4-digit number"
+                className="bg-gray-700 text-white"
               />
             </div>
             <div>
@@ -62,6 +64,7 @@ export function AssetTagGenerator() {
                 value={assetType}
                 onChange={(e) => setAssetType(e.target.value)}
                 placeholder="3-character code"
+                className="bg-gray-700 text-white"
               />
             </div>
             {assetCategory === 'office' ? (
@@ -73,6 +76,7 @@ export function AssetTagGenerator() {
                     value={building}
                     onChange={(e) => setBuilding(e.target.value)}
                     placeholder="3-character code"
+                    className="bg-gray-700 text-white"
                   />
                 </div>
                 <div>
@@ -82,6 +86,7 @@ export function AssetTagGenerator() {
                     value={roomNumber}
                     onChange={(e) => setRoomNumber(e.target.value)}
                     placeholder="3-digit number"
+                    className="bg-gray-700 text-white"
                   />
                 </div>
               </>
@@ -94,6 +99,7 @@ export function AssetTagGenerator() {
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     placeholder="3-character code"
+                    className="bg-gray-700 text-white"
                   />
                 </div>
                 <div>
@@ -103,16 +109,17 @@ export function AssetTagGenerator() {
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
                     placeholder="3-digit number"
+                    className="bg-gray-700 text-white"
                   />
                 </div>
               </>
             )}
-            <Button onClick={generateTag} className="w-full">Generate Tag</Button>
+            <Button onClick={generateTag} className="w-full bg-blue-600 hover:bg-blue-700">Generate Tag</Button>
           </div>
         </CardContent>
       </Card>
       {generatedTag && (
-        <Card>
+        <Card className="bg-gray-800 text-white">
           <CardHeader>
             <CardTitle>Generated Asset Tag</CardTitle>
           </CardHeader>

@@ -17,9 +17,9 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
   ]
 
   return (
-    <div className={`bg-gray-800 text-white h-full ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
+    <div className={`bg-gray-900 text-white h-full ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
       <div className="flex flex-col h-full">
-        <div className="p-4">
+        <div className="p-4 border-b border-gray-700">
           <h1 className={`text-xl font-bold ${collapsed ? 'hidden' : ''}`}>Tagger</h1>
         </div>
         <nav className="flex-1">
@@ -27,7 +27,7 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
             <Button
               key={item.section}
               variant="ghost"
-              className={`w-full justify-start py-2 ${activeSection === item.section ? 'bg-gray-700' : ''}`}
+              className={`w-full justify-start py-2 ${activeSection === item.section ? 'bg-gray-800' : ''}`}
               onClick={() => setActiveSection(item.section)}
             >
               {item.icon}
@@ -35,7 +35,7 @@ export function SidebarComponent({ setActiveSection, activeSection }: { setActiv
             </Button>
           ))}
         </nav>
-        <div className="p-4">
+        <div className="p-4 border-t border-gray-700">
           <UserProfile collapsed={collapsed} />
           <Button variant="ghost" className="w-full justify-start mt-2" onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
