@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Database Operations{% endblock %}
+
+{% block content %}
+<h1>Database Operations</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Model</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for model in ['AssetType', 'Building', 'Department'] %}
+        <tr>
+            <td>{{ model }}s</td>
+            <td>
+                <div class="btn-group d-flex" role="group">
+                    <form action="{{ url_for('main.import_data', model_name=model) }}" method="post" enctype="multipart/form-data" class="flex-grow-1">
+                        <input type="file" name="file" accept=".csv" style="display: none;" id="{{ model.lower() }}File">
+                        <label for="{{ model.lower() }}File" class="btn btn-info w-100"><i class="fas fa-file-import"></i> Import</label>
+                        <button type="submit" class="d-none">Import</button>
+                    </form>
+                    <a href="{{ url_for('main.export_data', model_name=model) }}" class="btn btn-success flex-grow-1"><i class="fas fa-file-export"></i> Export</a>
+                    <a href="{{ url_for('main.clear_table', model_name=model) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to clear all {{ model }}s?')"><i class="fas fa-trash-alt"></i> Clear</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInputs = document.querySelectorAll('input[name$="code"]');
+        
+        codeInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+    });
+</script>
+{% endblock %}

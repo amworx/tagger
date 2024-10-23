@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Settings</h2>
+        <form method="POST" action="{{ url_for('main.settings') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                <label for="app_name" class="form-label">App Name</label>
+                <div class="input-group">
+                    {{ form.app_name(class="form-control", placeholder="Enter app name") }}
+                </div>
+                <div class="form-text">Current app name: {{ current_app.config.get('APP_NAME', 'Tagger') }}</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Interface theme</label>
+                <div class="d-flex">
+                    {% for subfield in form.interface_theme %}
+                        <div class="form-check me-3">
+                            {{ subfield(class="form-check-input") }}
+                            {{ subfield.label(class="form-check-label") }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-text">Select your UI theme.</div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInputs = document.querySelectorAll('input[name$="code"]');
+        
+        codeInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+    });
+</script>
+{% endblock %}
