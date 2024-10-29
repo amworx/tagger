@@ -98,19 +98,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const assetCategory = document.getElementById('asset_category');
     const officeFields = document.getElementById('office-fields');
     const employeeFields = document.getElementById('employee-fields');
+    const form = document.getElementById('tag-form');
     
     function toggleFields() {
         if (assetCategory.value === 'office') {
             officeFields.style.display = 'block';
             employeeFields.style.display = 'none';
+            // Make office fields required
+            document.getElementById('building').required = true;
+            document.getElementById('room_number').required = true;
+            // Make employee fields not required
+            document.getElementById('department').required = false;
+            document.getElementById('employee_id').required = false;
         } else {
             officeFields.style.display = 'none';
             employeeFields.style.display = 'block';
+            // Make office fields not required
+            document.getElementById('building').required = false;
+            document.getElementById('room_number').required = false;
+            // Make employee fields required
+            document.getElementById('department').required = true;
+            document.getElementById('employee_id').required = true;
         }
     }
     
+    // Call toggleFields on page load to set initial state
+    toggleFields();
+    
+    // Call toggleFields whenever the asset category changes
     assetCategory.addEventListener('change', toggleFields);
-    toggleFields(); // Call once to set initial state
 
     // Initialize select2 for dropdowns
     $('#asset_type, #building, #department').select2({
