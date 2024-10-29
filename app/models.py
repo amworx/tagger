@@ -5,6 +5,11 @@ from flask_login import UserMixin
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import event  # Add this import
 
+class UserRoleType(str, Enum):
+    SUPERADMIN = 'superadmin'
+    ADMIN = 'admin'
+    USER = 'user'
+
 class DataType(Enum):
     ASSET_TYPE = 'asset_type'
     BUILDING = 'building'
@@ -115,6 +120,10 @@ class UserRole(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(200))
     permissions = db.relationship('RolePermission', backref='role', lazy=True)
+    
+    SUPERADMIN = 'superadmin'
+    ADMIN = 'admin'
+    USER = 'user'
     
     def has_permission(self, permission):
         if isinstance(permission, Permission):
