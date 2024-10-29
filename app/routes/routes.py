@@ -324,11 +324,11 @@ def create_user():
         return redirect(url_for('main.user_list'))
     return render_template('user_form.html', form=form, title='Create User')
 
-@bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@bp.route('/edit_user/<int:id>', methods=['GET', 'POST'])
 @login_required
 @requires_permission('user_management', PermissionType.WRITE)
-def edit_user(user_id):
-    user = User.query.get_or_404(user_id)
+def edit_user(id):
+    user = User.query.get_or_404(id)
     if not current_user.can_manage_user(user):
         flash('You do not have permission to edit this user.', 'danger')
         return redirect(url_for('main.user_list'))
