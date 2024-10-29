@@ -59,6 +59,9 @@ def create_app(config_class=Config):
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp)
 
+    from app.routes.permissions import bp as permissions_bp
+    app.register_blueprint(permissions_bp, url_prefix='/permissions')
+
     @app.before_request
     def require_login():
         if not current_user.is_authenticated and request.endpoint and request.endpoint != 'static' and request.endpoint[:4] != 'auth':
