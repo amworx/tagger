@@ -72,6 +72,20 @@
                             </a>
                         </li>
                     {% endif %}
+                    {% if current_user.is_superadmin() %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'permissions.permission_groups' %}active{% endif %}" 
+                               href="{{ url_for('permissions.permission_groups') }}">
+                                <i class="fas fa-users-cog"></i> Permission Groups
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'permissions.audit_log' %}active{% endif %}" 
+                               href="{{ url_for('permissions.audit_log') }}">
+                                <i class="fas fa-history"></i> Permission Audit Log
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
             <div class="sidebar-footer">
