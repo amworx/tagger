@@ -9,10 +9,11 @@
             {% for field in form if field.widget.input_type != 'hidden' and field.name != 'submit' %}
                 <div class="mb-3">
                     {{ field.label(class="form-label") }}
-                    {% if field.type == 'PasswordField' %}
-                        {{ field(class="form-control", autocomplete="new-password") }}
+                    {% if field.name == 'role' and user and user.is_superadmin() %}
+                        {{ field(class="form-control", disabled=True) }}
+                        <small class="text-muted">Superadmin role cannot be changed</small>
                     {% else %}
-                        {{ field(class="form-control", disabled=(user.is_superadmin() and field.name in ['username', 'role'])) }}
+                        {{ field(class="form-control") }}
                     {% endif %}
                     {% if field.errors %}
                         {% for error in field.errors %}
@@ -22,6 +23,7 @@
                 </div>
             {% endfor %}
             {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ request.referrer }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>

@@ -245,13 +245,20 @@ body {
 }
 
 .btn {
-    border-radius: 5px;
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
     transition: all 0.3s ease;
-    height: 38px;
+    min-width: 100px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 38px;
 }
 
 .btn-primary {
@@ -325,14 +332,12 @@ body {
 }
 
 .btn-group {
-    display: flex;
-    gap: 5px;
-    width: 100%;
+    display: inline-flex;
+    gap: 0.25rem;
 }
 
 .btn-group .btn {
-    flex: 1;
-    white-space: nowrap;
+    border-radius: 8px !important;
 }
 
 .btn-group form {
@@ -1195,5 +1200,49 @@ input:checked + .slider .fa-moon {
     font-weight: 700;
     margin: 0;
     color: var(--text-color);
+}
+
+/* Add or update these button styles */
+.btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 38px;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    min-width: 80px;
+    height: 32px;
+}
+
+.btn-group {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.btn-group .btn {
+    border-radius: 8px !important;
+}
+
+/* Modal buttons */
+.modal-footer .btn {
+    min-width: 120px;
+}
+
+/* Form buttons */
+form .btn {
+    margin-right: 0.5rem;
 }
 

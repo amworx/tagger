@@ -25,9 +25,17 @@
                             <td>{{ model }}</td>
                             <td>{{ model_counts[model] }}</td>
                             <td>
-                                <button onclick="clearTable('{{ model }}')" class="btn btn-danger btn-sm">
-                                    Clear Table
-                                </button>
+                                <div class="btn-group">
+                                    <button onclick="clearTable('{{ model }}')" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Clear Table
+                                    </button>
+                                    <button onclick="exportTable('{{ model }}')" class="btn btn-success">
+                                        <i class="fas fa-file-export"></i> Export
+                                    </button>
+                                    <button onclick="showImportModal('{{ model }}')" class="btn btn-info">
+                                        <i class="fas fa-file-import"></i> Import
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -38,7 +46,7 @@
 
         <!-- Backup and Restore -->
         <div class="section">
-            <h3>Backup and Restore</h3>
+            <h3>Database Backup</h3>
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
@@ -46,7 +54,7 @@
                             <h4>Backup Database</h4>
                             <p>Download a backup of the current database.</p>
                             <a href="{{ url_for('main.backup_database') }}" class="btn btn-primary">
-                                Download Backup
+                                <i class="fas fa-download"></i> Download Backup
                             </a>
                         </div>
                     </div>
@@ -61,7 +69,7 @@
                                     <input type="file" class="form-control" id="backupFile" accept=".db">
                                 </div>
                                 <button type="submit" class="btn btn-warning">
-                                    Restore Backup
+                                    <i class="fas fa-upload"></i> Restore Backup
                                 </button>
                             </form>
                         </div>
@@ -72,12 +80,71 @@
     </div>
 </div>
 
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="importForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control" id="importFile" accept=".csv" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="importTable()">Import</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block extra_js %}
 <script>
+let currentModel = '';
+
 function clearTable(modelName) {
     if (confirm(`Are you sure you want to clear all records from ${modelName}?`)) {
         window.location.href = "{{ url_for('main.clear_table', model_name='') }}" + modelName;
     }
+}
+
+function exportTable(modelName) {
+    window.location.href = "{{ url_for('main.export_') }}" + modelName.toLowerCase();
+}
+
+function showImportModal(modelName) {
+    currentModel = modelName;
+    document.getElementById('importFile').value = '';
+    new bootstrap.Modal(document.getElementById('importModal')).show();
+}
+
+function importTable() {
+    const formData = new FormData();
+    const fileInput = document.getElementById('importFile');
+    formData.append('file', fileInput.files[0]);
+
+    fetch("{{ url_for('main.import_') }}" + currentModel.toLowerCase(), {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'An error occurred during import');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during import');
+    });
 }
 
 document.getElementById('restoreForm').addEventListener('submit', function(e) {
