@@ -17,19 +17,7 @@ COPY . .
 RUN mkdir -p instance
 
 # Initialize the database and create superadmin user
-RUN python -c "from app import db, create_app; \
-    app = create_app(); \
-    app.app_context().push(); \
-    db.create_all(); \
-    from app.models import User, UserRole; \
-    if not User.query.filter_by(username='superadmin').first(): \
-        from werkzeug.security import generate_password_hash; \
-        user = User(username='superadmin', \
-                   email='superadmin@example.com', \
-                   password_hash=generate_password_hash('superadmin'), \
-                   role=UserRole.SUPERADMIN); \
-        db.session.add(user); \
-        db.session.commit()"
+RUN python init_db.py
 
 # Expose port 80
 EXPOSE 80
