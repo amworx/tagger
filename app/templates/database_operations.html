@@ -115,7 +115,20 @@ function clearTable(modelName) {
 }
 
 function exportTable(modelName) {
-    window.location.href = "{{ url_for('main.export_') }}" + modelName.toLowerCase();
+    const model = modelName.toLowerCase();
+    switch(model) {
+        case 'assettype':
+            window.location.href = "{{ url_for('main.export_asset_type') }}";
+            break;
+        case 'building':
+            window.location.href = "{{ url_for('main.export_building') }}";
+            break;
+        case 'department':
+            window.location.href = "{{ url_for('main.export_department') }}";
+            break;
+        default:
+            alert('Export not available for this table');
+    }
 }
 
 function showImportModal(modelName) {
@@ -129,7 +142,25 @@ function importTable() {
     const fileInput = document.getElementById('importFile');
     formData.append('file', fileInput.files[0]);
 
-    fetch("{{ url_for('main.import_') }}" + currentModel.toLowerCase(), {
+    const model = currentModel.toLowerCase();
+    let importUrl = '';
+    
+    switch(model) {
+        case 'assettype':
+            importUrl = "{{ url_for('main.import_asset_type') }}";
+            break;
+        case 'building':
+            importUrl = "{{ url_for('main.import_building') }}";
+            break;
+        case 'department':
+            importUrl = "{{ url_for('main.import_department') }}";
+            break;
+        default:
+            alert('Import not available for this table');
+            return;
+    }
+
+    fetch(importUrl, {
         method: 'POST',
         body: formData
     })
