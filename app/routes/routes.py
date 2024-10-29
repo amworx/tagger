@@ -11,6 +11,8 @@ from io import StringIO
 import os
 from datetime import datetime
 import json
+import shutil
+import tempfile
 
 @bp.route('/')
 @bp.route('/index')
@@ -161,3 +163,123 @@ def update_setting(key, value):
 def get_setting(key, default):
     setting = Setting.query.filter_by(key=key).first()
     return setting.value if setting else default
+
+@bp.route('/database_operations')
+@login_required
+@requires_permission('database_operations', PermissionType.READ)
+def database_operations():
+    if not current_user.is_admin():
+        flash('You do not have permission to access this page.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    models = [AssetType, Building, Department, User]
+    model_counts = {model.__name__: model.query.count() for model in models}
+    
+    return render_template('database_operations.html', 
+                         models=[m.__name__ for m in models], 
+                         model_counts=model_counts)
+
+@bp.route('/clear_table/<string:model_name>')
+@login_required
+@requires_permission('database_operations', PermissionType.MANAGE)
+def clear_table(model_name):
+    if not current_user.is_admin():
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    model = globals()[model_name]
+    db.session.query(model).delete()
+    db.session.commit()
+    flash(f'{model_name} table cleared successfully', 'success')
+    return redirect(url_for('main.database_operations'))
+
+@bp.route('/backup')
+@login_required
+@requires_permission('database_operations', PermissionType.MANAGE)
+def backup_database():
+    if not current_user.is_admin():
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    try:
+        # Get the database file path
+        db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+        if not db_uri.startswith('sqlite:///'):
+            return jsonify({'success': False, 'error': 'Unsupported database type'})
+        
+        db_path = os.path.join(current_app.root_path, db_uri.replace('sqlite:///', ''))
+        if not os.path.exists(db_path):
+            return jsonify({'success': False, 'error': f'Database file not found: {db_path}'})
+
+        # Ensure all changes are written to disk
+        db.session.commit()
+        
+        # Generate backup filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_filename = f'tagger_backup_{timestamp}.db'
+        
+        # Send the database file directly
+        return send_file(
+            db_path,
+            mimetype='application/x-sqlite3',
+            as_attachment=True,
+            download_name=backup_filename
+        )
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@bp.route('/restore', methods=['POST'])
+@login_required
+@requires_permission('database_operations', PermissionType.MANAGE)
+def restore_database():
+    if not current_user.is_admin():
+        return jsonify({'success': False, 'error': 'You do not have permission to perform this action.'})
+    
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'})
+    
+    file = request.files['file']
+    if not file.filename or not file.filename.endswith('.db'):
+        return jsonify({'success': False, 'error': 'Invalid file format. Please upload a .db file'})
+    
+    try:
+        # Get the current database path
+        db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+        if not db_uri.startswith('sqlite:///'):
+            return jsonify({'success': False, 'error': 'Unsupported database type'})
+        
+        db_path = os.path.join(current_app.root_path, db_uri.replace('sqlite:///', ''))
+        
+        # Close all database connections
+        db.session.remove()
+        db.engine.dispose()
+        
+        # Create a backup of the current database
+        current_backup = f"{db_path}.bak"
+        shutil.copy2(db_path, current_backup)
+        
+        try:
+            # Save the uploaded file as the new database
+            file.save(db_path)
+            
+            # Test the restored database
+            with current_app.app_context():
+                db.engine.connect()
+                # Try a simple query to verify the database is working
+                User.query.first()
+            
+            return jsonify({'success': True})
+            
+        except Exception as e:
+            # If something goes wrong, restore the original database
+            shutil.copy2(current_backup, db_path)
+            return jsonify({'success': False, 'error': f'Error restoring database: {str(e)}'})
+        
+        finally:
+            # Clean up the temporary backup
+            if os.path.exists(current_backup):
+                os.remove(current_backup)
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Error processing backup file: {str(e)}'})

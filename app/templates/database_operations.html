@@ -3,273 +3,110 @@
 {% block title %}Database Operations{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Database Operations</h1>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Data Overview</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for model, count in model_counts.items() %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ model }}
-                            <span class="badge bg-primary rounded-pill">{{ count }}</span>
-                            <button class="btn btn-danger btn-sm ms-2 wipe-table-btn" 
-                                    data-model="{{ model }}"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#wipeConfirmModal">
-                                <i class="fas fa-trash"></i> Wipe
-                            </button>
-                        </li>
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Database Operations</h2>
+        
+        <!-- Table Management -->
+        <div class="section mb-4">
+            <h3>Table Management</h3>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Table Name</th>
+                            <th>Record Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model in models %}
+                        <tr>
+                            <td>{{ model }}</td>
+                            <td>{{ model_counts[model] }}</td>
+                            <td>
+                                <button onclick="clearTable('{{ model }}')" class="btn btn-danger btn-sm">
+                                    Clear Table
+                                </button>
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </ul>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Data Export/Import</h5>
-                </div>
-                <div class="card-body">
-                    <h6>Export Data</h6>
-                    <div class="mb-3">
-                        <select id="export-model" class="form-select">
-                            {% for model in models %}
-                            <option value="{{ model }}">{{ model }}</option>
-                            {% endfor %}
-                        </select>
+        <!-- Backup and Restore -->
+        <div class="section">
+            <h3>Backup and Restore</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4>Backup Database</h4>
+                            <p>Download a backup of the current database.</p>
+                            <a href="{{ url_for('main.backup_database') }}" class="btn btn-primary">
+                                Download Backup
+                            </a>
+                        </div>
                     </div>
-                    <button id="export-btn" class="btn btn-primary">Export CSV</button>
-
-                    <hr>
-
-                    <h6>Import Data</h6>
-                    <form id="import-form" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <select id="import-model" name="model" class="form-select">
-                                {% for model in models %}
-                                <option value="{{ model }}">{{ model }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Import Mode</label>
-                            <select name="import_mode" class="form-select">
-                                <option value="append">Append - Add new records only</option>
-                                <option value="replace">Replace - Update existing records</option>
-                                <option value="overwrite">Overwrite - Clear table and import new data</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <input type="file" name="file" class="form-control" accept=".csv" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Import CSV</button>
-                    </form>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Database Backup and Restore</h5>
-                </div>
-                <div class="card-body">
-                    <a href="{{ url_for('main.backup_database') }}" id="backup-btn" class="btn btn-primary me-2">Create Backup</a>
-                    <form id="restore-form" enctype="multipart/form-data" style="display: inline;">
-                        <input type="file" id="restore-file" name="file" style="display: none;" accept=".db">
-                        <button type="button" id="restore-btn" class="btn btn-warning">Restore from Backup</button>
-                    </form>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4>Restore Database</h4>
+                            <p>Upload a database backup file to restore.</p>
+                            <form id="restoreForm" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <input type="file" class="form-control" id="backupFile" accept=".db">
+                                </div>
+                                <button type="submit" class="btn btn-warning">
+                                    Restore Backup
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Add this new modal for wipe confirmation -->
-<div class="modal fade" id="wipeConfirmModal" tabindex="-1" aria-labelledby="wipeConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="wipeConfirmModalLabel">Confirm Table Wipe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-danger">Warning: This action cannot be undone!</p>
-                <p>Are you sure you want to wipe all data from the <strong id="modelName"></strong> table?</p>
-                <div class="mb-3">
-                    <label for="confirmText" class="form-label">Type "WIPE" to confirm:</label>
-                    <input type="text" class="form-control" id="confirmText" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmWipeBtn" disabled>Wipe Table</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
 
 {% block extra_js %}
-{{ super() }}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get all the necessary elements
-        const importForm = document.getElementById('import-form');
-        const exportBtn = document.getElementById('export-btn');
-        const restoreBtn = document.getElementById('restore-btn');
-        const restoreFile = document.getElementById('restore-file');
-        const restoreForm = document.getElementById('restore-form');
-        let modelToWipe = '';
-        const confirmWipeBtn = document.getElementById('confirmWipeBtn');
-        const confirmText = document.getElementById('confirmText');
-        
-        // Handle restore button click
-        if (restoreBtn && restoreFile) {
-            restoreBtn.addEventListener('click', function() {
-                restoreFile.click();
-            });
+function clearTable(modelName) {
+    if (confirm(`Are you sure you want to clear all records from ${modelName}?`)) {
+        window.location.href = "{{ url_for('main.clear_table', model_name='') }}" + modelName;
+    }
+}
 
-            restoreFile.addEventListener('change', function() {
-                if (!this.files.length) return;
-                
-                if (confirm('Are you sure you want to restore the database from the selected backup? This will overwrite all current data.')) {
-                    const formData = new FormData();
-                    formData.append('file', this.files[0]);
-
-                    // Show loading state
-                    restoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Restoring...';
-                    restoreBtn.disabled = true;
-
-                    fetch("{{ url_for('main.restore_database') }}", {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Database restored successfully');
-                            location.reload();
-                        } else {
-                            alert('Error restoring database: ' + (data.error || 'Unknown error'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Restore error:', error);
-                        alert('Error restoring database: ' + error);
-                    })
-                    .finally(() => {
-                        // Reset button state
-                        restoreBtn.innerHTML = 'Restore from Backup';
-                        restoreBtn.disabled = false;
-                        // Clear the file input
-                        restoreFile.value = '';
-                    });
-                } else {
-                    // Clear the file input if user cancels
-                    this.value = '';
-                }
-            });
+document.getElementById('restoreForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!confirm('Are you sure you want to restore the database? This will overwrite all current data.')) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', document.getElementById('backupFile').files[0]);
+    
+    fetch("{{ url_for('main.restore_database') }}", {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Database restored successfully. The page will now reload.');
+            window.location.reload();
+        } else {
+            alert('Error restoring database: ' + data.error);
         }
-
-        // Handle wipe button clicks
-        document.querySelectorAll('.wipe-table-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                modelToWipe = this.dataset.model;
-                document.getElementById('modelName').textContent = modelToWipe;
-                confirmText.value = '';
-                confirmWipeBtn.disabled = true;
-            });
-        });
-
-        // Handle confirmation text input
-        confirmText.addEventListener('input', function() {
-            confirmWipeBtn.disabled = this.value !== 'WIPE';
-        });
-
-        // Handle wipe confirmation
-        confirmWipeBtn.addEventListener('click', function() {
-            if (confirmText.value === 'WIPE') {
-                fetch(`/wipe_table/${modelToWipe}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while wiping the table.');
-                });
-
-                // Close the modal
-                bootstrap.Modal.getInstance(document.getElementById('wipeConfirmModal')).hide();
-            }
-        });
-
-        // Handle export button click
-        if (exportBtn) {
-            exportBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const model = document.getElementById('export-model').value;
-                window.location.href = "{{ url_for('main.export_data', model_name='') }}" + model;
-            });
-        }
-
-        // Handle import form submission
-        if (importForm) {
-            importForm.addEventListener('submit', function(e) {
-                console.log('Import form submitted');
-                e.preventDefault();
-                const formData = new FormData(this);
-                
-                // Show loading state
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importing...';
-                submitBtn.disabled = true;
-
-                fetch("{{ url_for('main.import_data') }}", {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Import response:', data);
-                    if (data.success) {
-                        alert(data.message || 'Data imported successfully');
-                        location.reload();
-                    } else {
-                        alert('Error importing data: ' + (data.error || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Import error:', error);
-                    alert('Error importing data: ' + error);
-                })
-                .finally(() => {
-                    // Reset button state
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                });
-            });
-        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
     });
+});
 </script>
+{% endblock %}
 {% endblock %}
