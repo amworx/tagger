@@ -121,8 +121,17 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default=UserRole.USER)
 
     # Relationships
-    permissions = db.relationship('Permission', secondary='user_permission')
-    groups = db.relationship('PermissionGroup', secondary='user_groups')
+    permissions = db.relationship('Permission',
+        secondary='user_permission',
+        primaryjoin="User.id==UserPermission.user_id",
+        secondaryjoin="UserPermission.permission_id==Permission.id",
+        backref=db.backref('users', lazy='dynamic')
+    )
+    
+    groups = db.relationship('PermissionGroup',
+        secondary='user_groups',
+        backref=db.backref('users', lazy='dynamic')
+    )
 
     def is_superadmin(self):
         return self.role == UserRole.SUPERADMIN
@@ -218,11 +227,17 @@ class RolePermission(db.Model):
     permission_id = db.Column(db.Integer, db.ForeignKey('permission.id'), nullable=False)
 
 class UserPermission(db.Model):
+    __tablename__ = 'user_permission'  # Add explicit table name
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     permission_id = db.Column(db.Integer, db.ForeignKey('permission.id'), nullable=False)
     granted_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     granted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Add relationships
+    user = db.relationship('User', foreign_keys=[user_id])
+    granted_by = db.relationship('User', foreign_keys=[granted_by_id])
+    permission = db.relationship('Permission')
 
 class PermissionAudit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -236,11 +251,11 @@ class PermissionAudit(db.Model):
 
 # Association tables
 group_permissions = db.Table('group_permissions',
-    db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id')),
-    db.Column('permission_id', db.Integer, db.ForeignKey('permission.id'))
+    db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id'), primary_key=True),
+    db.Column('permission_id', db.Integer, db.ForeignKey('permission.id'), primary_key=True)
 )
 
 user_groups = db.Table('user_groups',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id'))
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id'), primary_key=True)
 )
