@@ -16,8 +16,9 @@ COPY . .
 # Expose port 80
 EXPOSE 80
 
-# Environment variable to change Flask's default port to 80
+# Environment variables for Flask
+ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=80
 
-# Run the application
-CMD ["python", "run.py"] 
+# Run the application with host and port arguments
+CMD ["python", "-c", "from run import app; app.run(host='0.0.0.0', port=80)"] 
