@@ -343,7 +343,7 @@ def edit_user(id):
         db.session.commit()
         flash('User updated successfully!', 'success')
         return redirect(url_for('main.user_list'))
-    return render_template('user_form.html', form=form, title='Edit User')
+    return render_template('user_form.html', form=form, title='Edit User', user=user)
 
 @bp.route('/edit_building/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -490,3 +490,133 @@ def add_asset_type():
             for error in errors:
                 flash(f'Error in {field}: {error}', 'danger')
     return redirect(url_for('main.asset_type_list'))
+
+# Add these routes to handle export/import
+@bp.route('/export_asset_type')
+@login_required
+@requires_permission('asset_types', PermissionType.READ)
+def export_asset_type():
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['title', 'code'])  # Headers
+    
+    for item in AssetType.query.all():
+        writer.writerow([item.title, item.code])
+    
+    output.seek(0)
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=asset_types.csv'}
+    )
+
+@bp.route('/export_building')
+@login_required
+@requires_permission('buildings', PermissionType.READ)
+def export_building():
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['title', 'code'])  # Headers
+    
+    for item in Building.query.all():
+        writer.writerow([item.title, item.code])
+    
+    output.seek(0)
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=buildings.csv'}
+    )
+
+@bp.route('/export_department')
+@login_required
+@requires_permission('departments', PermissionType.READ)
+def export_department():
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['title', 'code'])  # Headers
+    
+    for item in Department.query.all():
+        writer.writerow([item.title, item.code])
+    
+    output.seek(0)
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=departments.csv'}
+    )
+
+@bp.route('/import_asset_type', methods=['POST'])
+@login_required
+@requires_permission('asset_types', PermissionType.WRITE)
+def import_asset_type():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'})
+    
+    file = request.files['file']
+    if not file.filename.endswith('.csv'):
+        return jsonify({'success': False, 'error': 'Please upload a CSV file'})
+    
+    try:
+        stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+        reader = csv.DictReader(stream)
+        
+        for row in reader:
+            asset_type = AssetType(title=row['title'], code=row['code'])
+            db.session.add(asset_type)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
+
+@bp.route('/import_building', methods=['POST'])
+@login_required
+@requires_permission('buildings', PermissionType.WRITE)
+def import_building():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'})
+    
+    file = request.files['file']
+    if not file.filename.endswith('.csv'):
+        return jsonify({'success': False, 'error': 'Please upload a CSV file'})
+    
+    try:
+        stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+        reader = csv.DictReader(stream)
+        
+        for row in reader:
+            building = Building(title=row['title'], code=row['code'])
+            db.session.add(building)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
+
+@bp.route('/import_department', methods=['POST'])
+@login_required
+@requires_permission('departments', PermissionType.WRITE)
+def import_department():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'})
+    
+    file = request.files['file']
+    if not file.filename.endswith('.csv'):
+        return jsonify({'success': False, 'error': 'Please upload a CSV file'})
+    
+    try:
+        stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+        reader = csv.DictReader(stream)
+        
+        for row in reader:
+            department = Department(title=row['title'], code=row['code'])
+            db.session.add(department)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
