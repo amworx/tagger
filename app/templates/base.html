@@ -35,11 +35,13 @@
                             <i class="fas fa-tachometer-alt"></i> <span class="sidebar-text">Dashboard</span>
                         </a>
                     </li>
+                    {% if current_user.has_permission('tag_generation', 'READ') %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.generate_tag' %}active{% endif %}" href="{{ url_for('main.generate_tag') }}">
                             <i class="fas fa-plus-circle"></i> <span class="sidebar-text">Generate Tag</span>
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.asset_type_list' %}active{% endif %}" href="{{ url_for('main.asset_type_list') }}">
                             <i class="fas fa-cubes"></i> <span class="sidebar-text">Asset Types</span>
