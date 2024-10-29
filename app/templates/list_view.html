@@ -129,6 +129,24 @@
                     <div class="mb-3">
                         <label for="importFile" class="form-label">Select CSV File</label>
                         <input type="file" class="form-control" id="importFile" accept=".csv" required>
+                        <small class="text-muted">
+                            File must be a CSV with 'title' and 'code' columns
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Import Mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="importMode" id="appendMode" value="append" checked>
+                            <label class="form-check-label" for="appendMode">
+                                Append - Add new records to existing data
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="importMode" id="replaceMode" value="replace">
+                            <label class="form-check-label" for="replaceMode">
+                                Replace - Clear existing data before import
+                            </label>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -172,8 +190,20 @@ function exportTable() {
 function importTable() {
     const formData = new FormData();
     const fileInput = document.getElementById('importFile');
+    const mode = document.querySelector('input[name="importMode"]:checked').value;
+    
+    if (!fileInput.files.length) {
+        alert('Please select a file to import');
+        return;
+    }
+    
     formData.append('file', fileInput.files[0]);
-
+    formData.append('mode', mode);
+    
+    if (mode === 'replace' && !confirm('Are you sure you want to replace all existing data? This cannot be undone.')) {
+        return;
+    }
+    
     fetch("{{ url_for('main.import_' + model_name) }}", {
         method: 'POST',
         body: formData
@@ -181,6 +211,10 @@ function importTable() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            alert(data.message);
+            if (data.details.errors.length > 0) {
+                console.log('Import errors:', data.details.errors);
+            }
             window.location.reload();
         } else {
             alert(data.error || 'An error occurred during import');

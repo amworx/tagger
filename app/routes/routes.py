@@ -546,6 +546,47 @@ def export_department():
         headers={'Content-Disposition': 'attachment; filename=departments.csv'}
     )
 
+def import_data(model_class, data):
+    """
+    Generic function to import data with validation and duplicate checking
+    Returns: (success_count, duplicate_count, error_count, errors)
+    """
+    success_count = 0
+    duplicate_count = 0
+    error_count = 0
+    errors = []
+    
+    # Get existing records for duplicate checking
+    existing_records = {(r.title.lower(), r.code.upper()): r for r in model_class.query.all()}
+    
+    for row in data:
+        try:
+            # Normalize data for comparison
+            title = row['title'].strip()
+            code = row['code'].strip().upper()
+            
+            # Check for required fields
+            if not title or not code:
+                error_count += 1
+                errors.append(f"Row skipped: Missing title or code")
+                continue
+                
+            # Check for duplicates
+            if (title.lower(), code) in existing_records:
+                duplicate_count += 1
+                continue
+                
+            # Create new record
+            record = model_class(title=title, code=code)
+            db.session.add(record)
+            success_count += 1
+            
+        except Exception as e:
+            error_count += 1
+            errors.append(f"Error processing row: {str(e)}")
+    
+    return success_count, duplicate_count, error_count, errors
+
 @bp.route('/import_asset_type', methods=['POST'])
 @login_required
 @requires_permission('asset_types', PermissionType.WRITE)
@@ -558,15 +599,40 @@ def import_asset_type():
         return jsonify({'success': False, 'error': 'Please upload a CSV file'})
     
     try:
+        # Read CSV file
         stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
         reader = csv.DictReader(stream)
         
-        for row in reader:
-            asset_type = AssetType(title=row['title'], code=row['code'])
-            db.session.add(asset_type)
+        # Validate CSV structure
+        required_fields = ['title', 'code']
+        if not all(field in reader.fieldnames for field in required_fields):
+            return jsonify({
+                'success': False, 
+                'error': f'CSV must contain the following columns: {", ".join(required_fields)}'
+            })
+        
+        # Get import mode from request
+        mode = request.form.get('mode', 'append')
+        if mode == 'replace':
+            # Clear existing data
+            AssetType.query.delete()
+        
+        # Import data
+        success_count, duplicate_count, error_count, errors = import_data(AssetType, list(reader))
         
         db.session.commit()
-        return jsonify({'success': True})
+        
+        return jsonify({
+            'success': True,
+            'message': f'Import completed: {success_count} records added, {duplicate_count} duplicates skipped, {error_count} errors',
+            'details': {
+                'success_count': success_count,
+                'duplicate_count': duplicate_count,
+                'error_count': error_count,
+                'errors': errors
+            }
+        })
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)})
