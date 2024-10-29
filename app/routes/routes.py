@@ -430,3 +430,63 @@ def delete_asset_type(id):
     db.session.commit()
     flash('Asset Type deleted successfully!', 'success')
     return redirect(url_for('main.asset_type_list'))
+
+@bp.route('/add_building', methods=['POST'])
+@login_required
+@requires_permission('buildings', PermissionType.WRITE)
+def add_building():
+    form = BuildingForm()
+    if form.validate_on_submit():
+        building = Building(title=form.title.data, code=form.code.data)
+        try:
+            db.session.add(building)
+            db.session.commit()
+            flash('Building added successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding building: {str(e)}', 'danger')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Error in {field}: {error}', 'danger')
+    return redirect(url_for('main.building_list'))
+
+@bp.route('/add_department', methods=['POST'])
+@login_required
+@requires_permission('departments', PermissionType.WRITE)
+def add_department():
+    form = DepartmentForm()
+    if form.validate_on_submit():
+        department = Department(title=form.title.data, code=form.code.data)
+        try:
+            db.session.add(department)
+            db.session.commit()
+            flash('Department added successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding department: {str(e)}', 'danger')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Error in {field}: {error}', 'danger')
+    return redirect(url_for('main.department_list'))
+
+@bp.route('/add_asset_type', methods=['POST'])
+@login_required
+@requires_permission('asset_types', PermissionType.WRITE)
+def add_asset_type():
+    form = AssetTypeForm()
+    if form.validate_on_submit():
+        asset_type = AssetType(title=form.title.data, code=form.code.data)
+        try:
+            db.session.add(asset_type)
+            db.session.commit()
+            flash('Asset Type added successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding asset type: {str(e)}', 'danger')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Error in {field}: {error}', 'danger')
+    return redirect(url_for('main.asset_type_list'))
