@@ -570,6 +570,20 @@ def import_data(model_class, data):
                 error_count += 1
                 errors.append(f"Row skipped: Missing title or code")
                 continue
+            
+            # Validate code format based on model type
+            if model_class == AssetType and not code.endswith('A'):
+                error_count += 1
+                errors.append(f"Row skipped: Asset Type code must end with 'A': {code}")
+                continue
+            elif model_class == Building and not code.endswith('B'):
+                error_count += 1
+                errors.append(f"Row skipped: Building code must end with 'B': {code}")
+                continue
+            elif model_class == Department and not code.endswith('D'):
+                error_count += 1
+                errors.append(f"Row skipped: Department code must end with 'D': {code}")
+                continue
                 
             # Check for duplicates
             if (title.lower(), code) in existing_records:
@@ -649,15 +663,40 @@ def import_building():
         return jsonify({'success': False, 'error': 'Please upload a CSV file'})
     
     try:
+        # Read CSV file
         stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
         reader = csv.DictReader(stream)
         
-        for row in reader:
-            building = Building(title=row['title'], code=row['code'])
-            db.session.add(building)
+        # Validate CSV structure
+        required_fields = ['title', 'code']
+        if not all(field in reader.fieldnames for field in required_fields):
+            return jsonify({
+                'success': False, 
+                'error': f'CSV must contain the following columns: {", ".join(required_fields)}'
+            })
+        
+        # Get import mode from request
+        mode = request.form.get('mode', 'append')
+        if mode == 'replace':
+            # Clear existing data
+            Building.query.delete()
+        
+        # Import data
+        success_count, duplicate_count, error_count, errors = import_data(Building, list(reader))
         
         db.session.commit()
-        return jsonify({'success': True})
+        
+        return jsonify({
+            'success': True,
+            'message': f'Import completed: {success_count} records added, {duplicate_count} duplicates skipped, {error_count} errors',
+            'details': {
+                'success_count': success_count,
+                'duplicate_count': duplicate_count,
+                'error_count': error_count,
+                'errors': errors
+            }
+        })
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)})
@@ -674,15 +713,40 @@ def import_department():
         return jsonify({'success': False, 'error': 'Please upload a CSV file'})
     
     try:
+        # Read CSV file
         stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
         reader = csv.DictReader(stream)
         
-        for row in reader:
-            department = Department(title=row['title'], code=row['code'])
-            db.session.add(department)
+        # Validate CSV structure
+        required_fields = ['title', 'code']
+        if not all(field in reader.fieldnames for field in required_fields):
+            return jsonify({
+                'success': False, 
+                'error': f'CSV must contain the following columns: {", ".join(required_fields)}'
+            })
+        
+        # Get import mode from request
+        mode = request.form.get('mode', 'append')
+        if mode == 'replace':
+            # Clear existing data
+            Department.query.delete()
+        
+        # Import data
+        success_count, duplicate_count, error_count, errors = import_data(Department, list(reader))
         
         db.session.commit()
-        return jsonify({'success': True})
+        
+        return jsonify({
+            'success': True,
+            'message': f'Import completed: {success_count} records added, {duplicate_count} duplicates skipped, {error_count} errors',
+            'details': {
+                'success_count': success_count,
+                'duplicate_count': duplicate_count,
+                'error_count': error_count,
+                'errors': errors
+            }
+        })
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)})
