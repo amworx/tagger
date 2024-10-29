@@ -135,3 +135,27 @@ def audit_log():
     return render_template('permissions/audit_log.html',
                          audits=pagination.items,
                          pagination=pagination)
+
+@bp.route('/group/create', methods=['POST'])
+@login_required
+@requires_permission('permission_groups', PermissionType.WRITE)
+def create_group():
+    try:
+        name = request.form.get('name')
+        description = request.form.get('description')
+        
+        if not name:
+            return jsonify({'success': False, 'error': 'Group name is required'})
+        
+        group = PermissionGroup(
+            name=name,
+            description=description,
+            created_by_id=current_user.id
+        )
+        db.session.add(group)
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})

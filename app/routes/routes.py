@@ -85,36 +85,57 @@ def generate_tag():
 @login_required
 @requires_permission('asset_types', PermissionType.READ)
 def asset_type_list():
-    asset_types = AssetType.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    asset_types = AssetType.query.paginate(page=page, per_page=per_page)
     form = AssetTypeForm()
+    
     return render_template('list_view.html',
                          title='Asset Types',
                          model_name='asset_type',
-                         items=asset_types,
+                         items=asset_types.items,
+                         page=page,
+                         per_page=per_page,
+                         total_pages=asset_types.pages,
                          form=form)
 
 @bp.route('/building_list')
 @login_required
 @requires_permission('buildings', PermissionType.READ)
 def building_list():
-    buildings = Building.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    buildings = Building.query.paginate(page=page, per_page=per_page)
     form = BuildingForm()
+    
     return render_template('list_view.html',
                          title='Buildings',
                          model_name='building',
-                         items=buildings,
+                         items=buildings.items,
+                         page=page,
+                         per_page=per_page,
+                         total_pages=buildings.pages,
                          form=form)
 
 @bp.route('/department_list')
 @login_required
 @requires_permission('departments', PermissionType.READ)
 def department_list():
-    departments = Department.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    departments = Department.query.paginate(page=page, per_page=per_page)
     form = DepartmentForm()
+    
     return render_template('list_view.html',
                          title='Departments',
                          model_name='department',
-                         items=departments,
+                         items=departments.items,
+                         page=page,
+                         per_page=per_page,
+                         total_pages=departments.pages,
                          form=form)
 
 @bp.route('/user_list')
@@ -283,3 +304,22 @@ def restore_database():
             
     except Exception as e:
         return jsonify({'success': False, 'error': f'Error processing backup file: {str(e)}'})
+
+@bp.route('/create_user', methods=['GET', 'POST'])
+@login_required
+@requires_permission('user_management', PermissionType.WRITE)
+def create_user():
+    form = UserForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            password_hash=hashed_password,
+            role=form.role.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        flash('User created successfully!', 'success')
+        return redirect(url_for('main.user_list'))
+    return render_template('user_form.html', form=form, title='Create User')
