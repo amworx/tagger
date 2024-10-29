@@ -323,3 +323,110 @@ def create_user():
         flash('User created successfully!', 'success')
         return redirect(url_for('main.user_list'))
     return render_template('user_form.html', form=form, title='Create User')
+
+@bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@requires_permission('user_management', PermissionType.WRITE)
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if not current_user.can_manage_user(user):
+        flash('You do not have permission to edit this user.', 'danger')
+        return redirect(url_for('main.user_list'))
+    
+    form = UserForm(obj=user)
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.email = form.email.data
+        if form.password.data:
+            user.password_hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user.role = form.role.data
+        db.session.commit()
+        flash('User updated successfully!', 'success')
+        return redirect(url_for('main.user_list'))
+    return render_template('user_form.html', form=form, title='Edit User')
+
+@bp.route('/edit_building/<int:id>', methods=['GET', 'POST'])
+@login_required
+@requires_permission('buildings', PermissionType.WRITE)
+def edit_building(id):
+    building = Building.query.get_or_404(id)
+    form = BuildingForm(obj=building)
+    if form.validate_on_submit():
+        building.title = form.title.data
+        building.code = form.code.data
+        db.session.commit()
+        flash('Building updated successfully!', 'success')
+        return redirect(url_for('main.building_list'))
+    return render_template('form.html', form=form, title='Edit Building')
+
+@bp.route('/edit_department/<int:id>', methods=['GET', 'POST'])
+@login_required
+@requires_permission('departments', PermissionType.WRITE)
+def edit_department(id):
+    department = Department.query.get_or_404(id)
+    form = DepartmentForm(obj=department)
+    if form.validate_on_submit():
+        department.title = form.title.data
+        department.code = form.code.data
+        db.session.commit()
+        flash('Department updated successfully!', 'success')
+        return redirect(url_for('main.department_list'))
+    return render_template('form.html', form=form, title='Edit Department')
+
+@bp.route('/edit_asset_type/<int:id>', methods=['GET', 'POST'])
+@login_required
+@requires_permission('asset_types', PermissionType.WRITE)
+def edit_asset_type(id):
+    asset_type = AssetType.query.get_or_404(id)
+    form = AssetTypeForm(obj=asset_type)
+    if form.validate_on_submit():
+        asset_type.title = form.title.data
+        asset_type.code = form.code.data
+        db.session.commit()
+        flash('Asset Type updated successfully!', 'success')
+        return redirect(url_for('main.asset_type_list'))
+    return render_template('form.html', form=form, title='Edit Asset Type')
+
+@bp.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+@requires_permission('user_management', PermissionType.DELETE)
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if not current_user.can_manage_user(user):
+        flash('You do not have permission to delete this user.', 'danger')
+        return redirect(url_for('main.user_list'))
+    
+    db.session.delete(user)
+    db.session.commit()
+    flash('User deleted successfully!', 'success')
+    return redirect(url_for('main.user_list'))
+
+@bp.route('/delete_building/<int:id>', methods=['POST'])
+@login_required
+@requires_permission('buildings', PermissionType.DELETE)
+def delete_building(id):
+    building = Building.query.get_or_404(id)
+    db.session.delete(building)
+    db.session.commit()
+    flash('Building deleted successfully!', 'success')
+    return redirect(url_for('main.building_list'))
+
+@bp.route('/delete_department/<int:id>', methods=['POST'])
+@login_required
+@requires_permission('departments', PermissionType.DELETE)
+def delete_department(id):
+    department = Department.query.get_or_404(id)
+    db.session.delete(department)
+    db.session.commit()
+    flash('Department deleted successfully!', 'success')
+    return redirect(url_for('main.department_list'))
+
+@bp.route('/delete_asset_type/<int:id>', methods=['POST'])
+@login_required
+@requires_permission('asset_types', PermissionType.DELETE)
+def delete_asset_type(id):
+    asset_type = AssetType.query.get_or_404(id)
+    db.session.delete(asset_type)
+    db.session.commit()
+    flash('Asset Type deleted successfully!', 'success')
+    return redirect(url_for('main.asset_type_list'))
