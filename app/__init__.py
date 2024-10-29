@@ -53,6 +53,7 @@ def create_app(config_class=Config):
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
+    # Register blueprints
     from app.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
