@@ -3,78 +3,121 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <!-- Statistics Cards -->
+<div class="container-fluid">
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <h5 class="card-title">Asset Types</h5>
-                    <p class="display-4">{{ total_asset_types }}</p>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Asset Types</h3>
+                            <p class="stat-number">{{ total_asset_types }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <h5 class="card-title">Buildings</h5>
-                    <p class="display-4">{{ total_buildings }}</p>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Buildings</h3>
+                            <p class="stat-number">{{ total_buildings }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <h5 class="card-title">Departments</h5>
-                    <p class="display-4">{{ total_departments }}</p>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Departments</h3>
+                            <p class="stat-number">{{ total_departments }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <h5 class="card-title">Users</h5>
-                    <p class="display-4">{{ total_users }}</p>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Users</h3>
+                            <p class="stat-number">{{ total_users }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Recent Items -->
-    <div class="row mt-4">
+    <div class="row g-4">
         <div class="col-md-4">
             <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Latest Asset Types</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Latest Asset Types</h5>
-                    <ul class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for asset_type in latest_asset_types %}
-                        <li class="list-group-item">{{ asset_type.title }} ({{ asset_type.code }})</li>
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ asset_type.title }}</h6>
+                            <small class="text-muted">Code: {{ asset_type.code }}</small>
+                        </div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Latest Buildings</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Latest Buildings</h5>
-                    <ul class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for building in latest_buildings %}
-                        <li class="list-group-item">{{ building.title }} ({{ building.code }})</li>
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ building.title }}</h6>
+                            <small class="text-muted">Code: {{ building.code }}</small>
+                        </div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Latest Departments</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Latest Departments</h5>
-                    <ul class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for department in latest_departments %}
-                        <li class="list-group-item">{{ department.title }} ({{ department.code }})</li>
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ department.title }}</h6>
+                            <small class="text-muted">Code: {{ department.code }}</small>
+                        </div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
