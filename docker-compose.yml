@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  tagger:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - .:/app
+      # Mount sqlite database directory to persist data
+      - sqlite_data:/app/instance
+
+volumes:
+  sqlite_data:

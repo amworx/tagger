@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ current_app.config.get('INTERFACE_THEME', 'theme-light') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ current_app.config.get('APP_NAME', 'Tagger') }}{% if self.title() %} - {% endif %}{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary-color: {{ current_app.config.get('PRIMARY_COLOR', '#FF0040') }};
+            --button-color: {{ current_app.config.get('BUTTON_COLOR', '#7e34ff') }};
+        }
+        body {
+            font-family: '{{ current_app.config.get('APP_FONT', 'Inter') }}', sans-serif;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="wrapper">
+        {% if not request.endpoint or 'auth.' not in request.endpoint %}
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                    <i class="fas fa-tag"></i>
+                    <span class="sidebar-title">{{ current_app.config.get('APP_NAME', 'Tagger') }}</span>
+                </a>
+            </div>
+            <div class="sidebar-content">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.generate_tag' %}active{% endif %}" href="{{ url_for('main.generate_tag') }}">
+                            <i class="fas fa-plus-circle"></i> <span class="sidebar-text">Generate Tag</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.asset_type_list' %}active{% endif %}" href="{{ url_for('main.asset_type_list') }}">
+                            <i class="fas fa-cubes"></i> <span class="sidebar-text">Asset Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.building_list' %}active{% endif %}" href="{{ url_for('main.building_list') }}">
+                            <i class="fas fa-building"></i> <span class="sidebar-text">Buildings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.department_list' %}active{% endif %}" href="{{ url_for('main.department_list') }}">
+                            <i class="fas fa-users"></i> <span class="sidebar-text">Departments</span>
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated and current_user.is_admin() %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'main.user_list' %}active{% endif %}" href="{{ url_for('main.user_list') }}">
+                                <i class="fas fa-user-cog"></i> <span class="sidebar-text">User Management</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'main.database_operations' %}active{% endif %}" href="{{ url_for('main.database_operations') }}">
+                                <i class="fas fa-database"></i> <span class="sidebar-text">Database Operations</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'main.settings' %}active{% endif %}" href="{{ url_for('main.settings') }}">
+                                <i class="fas fa-cog"></i> <span class="sidebar-text">Settings</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                {% if current_user.is_authenticated %}
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                        <i class="fas fa-sign-out-alt"></i> <span class="sidebar-text">Logout</span>
+                    </a>
+                {% else %}
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">
+                        <i class="fas fa-sign-in-alt"></i> <span class="sidebar-text">Login</span>
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %}
+        
+        <div id="content" class="content {% if request.endpoint and 'auth.' in request.endpoint %}full-width{% endif %}">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light d-lg-none">
+                <div class="container-fluid">
+                    <button id="sidebarCollapseBtn" class="btn btn-outline-secondary">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand" href="{{ url_for('main.index') }}">{{ current_app.config.get('APP_NAME', 'Tagger') }}</a>
+                </div>
+            </nav>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/responsive.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/custom-select.js') }}"></script> -->
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

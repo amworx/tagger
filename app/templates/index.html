@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h2>Welcome to Tagger</h2>
+<p>Generate naming conventions for your IT assets and clients.</p>
+<a href="{{ url_for('main.generate_tag') }}" class="btn btn-primary">Generate Tag</a>
+
+<h3>Data Management</h3>
+<div class="row">
+    <div class="col-md-4">
+        <h4>Asset Types</h4>
+        <a href="{{ url_for('main.asset_types') }}" class="btn btn-secondary">Manage Asset Types</a>
+        <form action="{{ url_for('main.import_data', model_name='AssetType') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv">
+            <button type="submit" class="btn btn-sm btn-info">Import</button>
+        </form>
+        <a href="{{ url_for('main.export_data', model_name='AssetType') }}" class="btn btn-sm btn-success">Export</a>
+    </div>
+    <div class="col-md-4">
+        <h4>Buildings</h4>
+        <a href="{{ url_for('main.buildings') }}" class="btn btn-secondary">Manage Buildings</a>
+        <form action="{{ url_for('main.import_data', model_name='Building') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv">
+            <button type="submit" class="btn btn-sm btn-info">Import</button>
+        </form>
+        <a href="{{ url_for('main.export_data', model_name='Building') }}" class="btn btn-sm btn-success">Export</a>
+    </div>
+    <div class="col-md-4">
+        <h4>Departments</h4>
+        <a href="{{ url_for('main.departments') }}" class="btn btn-secondary">Manage Departments</a>
+        <form action="{{ url_for('main.import_data', model_name='Department') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv">
+            <button type="submit" class="btn btn-sm btn-info">Import</button>
+        </form>
+        <a href="{{ url_for('main.export_data', model_name='Department') }}" class="btn btn-sm btn-success">Export</a>
+    </div>
+</div>
+{% endblock %}

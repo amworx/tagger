@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Settings</h2>
+        <form method="POST" action="{{ url_for('main.settings') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                <label for="app_name" class="form-label">App Name</label>
+                <div class="input-group">
+                    {{ form.app_name(class="form-control", placeholder="Enter app name") }}
+                </div>
+                <div class="form-text">Current app name: {{ current_app.config.get('APP_NAME', 'Tagger') }}</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label d-block">Interface Theme</label>
+                <div class="theme-switch-wrapper">
+                    <label class="theme-switch" for="theme-toggle">
+                        <input type="checkbox" id="theme-toggle" name="interface_theme" value="theme-dark" {% if form.interface_theme.data == 'theme-dark' %}checked{% endif %}>
+                        <div class="slider round">
+                            <i class="fas fa-sun"></i>
+                            <i class="fas fa-moon"></i>
+                        </div>
+                    </label>
+                    <span class="theme-label">{{ 'Dark Mode' if form.interface_theme.data == 'theme-dark' else 'Light Mode' }}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="app_font">Application Font</label>
+                <select class="form-control" id="app_font" name="app_font">
+                    <option value="Inter" {% if app_font == 'Inter' %}selected{% endif %}>Inter</option>
+                    <option value="Noto Sans" {% if app_font == 'Noto Sans' %}selected{% endif %}>Noto Sans</option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeLabel = document.querySelector('.theme-label');
+
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                themeLabel.textContent = 'Dark Mode';
+            } else {
+                themeLabel.textContent = 'Light Mode';
+            }
+        });
+    });
+</script>
+{% endblock %}

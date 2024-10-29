@@ -1,0 +1,1144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #FF0040;
+    --button-color: #7e34ff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #161519;
+    --sidebar-width: 250px;
+}
+
+.theme-light {
+    --bg-color: #f4f4f4;
+    --text-color: #333;
+    --navbar-bg: #fff;
+    --navbar-text: #333;
+    --card-bg: #fff;
+    --input-bg: #fff;
+    --table-bg: #fff;
+    --table-border: #dee2e6;
+    --table-stripe: #f2f2f2;
+    --pagination-bg: #fff;
+    --pagination-border: #dee2e6;
+    --pagination-hover-bg: #e9ecef;
+    --pagination-active-bg: var(--button-color);
+    --pagination-active-text: #fff;
+}
+
+.theme-dark {
+    --bg-color: #161519;
+    --text-color: #e0e0e0;
+    --navbar-bg: #1e1d23;
+    --navbar-text: #e0e0e0;
+    --card-bg: #1e1d23;
+    --input-bg: #2c2b31;
+    --table-bg: #1e1d23;
+    --table-border: #2c2b31;
+    --table-stripe: #252429;
+    --pagination-bg: #1e1d23;
+    --pagination-border: #2c2b31;
+    --pagination-hover-bg: #252429;
+    --pagination-active-bg: var(--button-color);
+    --pagination-active-text: #fff;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--navbar-bg);
+    color: var(--navbar-text);
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-content {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.sidebar-footer {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar .nav-link {
+    color: var(--navbar-text);
+    padding: 10px 20px;
+    transition: all 0.3s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-collapsed {
+    width: 60px;
+}
+
+.sidebar-collapsed .sidebar-text {
+    display: none;
+}
+
+.content {
+    margin-left: 250px;
+    transition: all 0.3s;
+}
+
+.content-expanded {
+    margin-left: 60px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        margin-left: -250px;
+    }
+    
+    .sidebar.active {
+        margin-left: 0;
+    }
+    
+    .content {
+        margin-left: 0;
+    }
+}
+
+.sidebar.collapsed {
+    min-width: 80px;
+    max-width: 80px;
+}
+
+.sidebar .nav-link span,
+.sidebar .navbar-brand span {
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .navbar-brand span {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar .navbar-brand {
+    color: var(--primary-color) !important;
+    font-weight: bold;
+}
+
+.sidebar .navbar-brand:hover {
+    color: var(--button-color) !important;
+}
+
+.sidebar .navbar-brand i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.sidebar .nav {
+    flex-grow: 1;
+}
+
+.sidebar .nav-link {
+    color: var(--navbar-text);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-collapse-btn {
+    align-self: flex-end;
+    margin: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.content {
+    width: calc(100% - 250px);
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    margin-left: 250px;
+}
+
+.content.expanded {
+    width: calc(100% - 80px);
+    margin-left: 80px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-color);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+}
+
+.btn {
+    border-radius: 5px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--button-color);
+    border-color: var(--button-color);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-info {
+    background-color: var(--button-color);
+    border-color: var(--button-color);
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-success {
+    background-color: var(--button-color);
+    border-color: var(--button-color);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: var(--button-color);
+    border-color: var(--button-color);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.table {
+    background-color: var(--table-bg);
+    color: var(--text-color);
+}
+
+.table th,
+.table td {
+    border-color: var(--table-border);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--table-stripe);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+.theme-dark .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.075);
+}
+
+.btn-group {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.btn-group .btn {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.btn-group form {
+    flex: 1;
+    margin: 0;
+}
+
+.btn-group .btn-danger {
+    flex: 0 0 auto;
+}
+
+.import-export-btn {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.clear-btn {
+    width: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-secondary {
+    color: var(--button-color);
+    border-color: var(--button-color);
+}
+
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: var(--button-color);
+    border-color: var(--button-color);
+}
+
+.btn-outline-danger {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.alert {
+    color: #fff;
+}
+
+.alert-success {
+    background-color: var(--success-color);
+}
+
+.alert-danger {
+    background-color: var(--danger-color);
+}
+
+.alert-info {
+    background-color: var(--info-color);
+}
+
+.alert-warning {
+    background-color: var(--warning-color);
+    color: #212529;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+.me-3 {
+    margin-right: 1rem;
+}
+
+#addFormSidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    overflow-y: auto;
+    z-index: 1000;
+    background-color: #f8f9fa;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(100%);
+}
+
+#addFormSidebar.show {
+    transform: translateX(0);
+}
+
+.sidebar-collapsed {
+    width: 60px;
+    transition: width 0.3s ease;
+}
+
+.sidebar-collapsed .nav-link span {
+    display: none;
+}
+
+.sidebar-collapsed .navbar-brand span {
+    display: none;
+}
+
+.main-content-expanded {
+    margin-left: 60px;
+    transition: margin-left 0.3s ease;
+}
+
+#sidebarCollapseBtn {
+    color: var(--text-color);
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+
+.sidebar .navbar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 15px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .content.active {
+        margin-left: 250px;
+    }
+
+    .sidebar-collapse-btn {
+        display: block;
+        position: fixed;
+        left: 10px;
+        top: 10px;
+        z-index: 1000;
+    }
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.card {
+    overflow-x: auto;
+}
+
+@media (max-width: 576px) {
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+/* Add more responsive styles as needed */
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    color: var(--navbar-text) !important;
+}
+
+.navbar-light .navbar-toggler-icon {
+    background-color: var(--navbar-text);
+}
+
+.pagination .page-link {
+    background-color: var(--pagination-bg);
+    border-color: var(--pagination-border);
+    color: var(--text-color);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--pagination-hover-bg);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--pagination-active-bg);
+    border-color: var(--pagination-active-bg);
+    color: var(--pagination-active-text);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--pagination-bg);
+    border-color: var(--pagination-border);
+    color: var(--secondary-color);
+}
+
+.navbar-brand, .sidebar .navbar-brand {
+    color: var(--text-color) !important;
+}
+
+/* Light theme styles */
+html[data-theme="theme-light"] {
+    --bg-color: #f4f4f4;
+    --text-color: #333;
+    --navbar-bg: #fff;
+    --navbar-text: #333;
+    --card-bg: #fff;
+    --input-bg: #fff;
+    --secondary-color: #6c757d;
+}
+
+/* Dark theme styles */
+html[data-theme="theme-dark"] {
+    --bg-color: #161519;
+    --text-color: #e0e0e0;
+    --navbar-bg: #1e1d23;
+    --navbar-text: #e0e0e0;
+    --card-bg: #1e1d23;
+    --input-bg: #2c2b31;
+    --secondary-color: #6c757d;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Add more theme-specific styles as needed */
+
+/* Update the form control styles for both themes */
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-color);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+}
+
+/* Add specific styles for select elements */
+select.form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2rem;
+}
+
+/* Adjust select background for dark theme */
+html[data-theme="theme-dark"] select.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Ensure text color changes for options in dark theme */
+html[data-theme="theme-dark"] select.form-select option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+/* Add these styles at the end of the file */
+
+/* Specific styles for select elements in dark mode */
+html[data-theme="theme-dark"] .form-select,
+html[data-theme="theme-dark"] select.form-control {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+
+html[data-theme="theme-dark"] .form-select option,
+html[data-theme="theme-dark"] select.form-control option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+/* Ensure the dropdown arrow is visible in dark mode */
+html[data-theme="theme-dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+}
+
+/* Style for focused select elements in dark mode */
+html[data-theme="theme-dark"] .form-select:focus,
+html[data-theme="theme-dark"] select.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+/* Add these styles at the end of the file */
+
+/* Specific styles for select elements */
+select.form-select,
+select.form-control {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+
+/* Style for options in select elements */
+select.form-select option,
+select.form-control option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+/* Ensure the dropdown arrow is visible */
+select.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+}
+
+/* Style for focused select elements */
+select.form-select:focus,
+select.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+/* Ensure text color changes for options */
+html[data-theme="theme-dark"] select.form-select option,
+html[data-theme="theme-dark"] select.form-control option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+/* Override any conflicting styles */
+.form-select,
+.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.form-select option,
+.form-control option {
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Custom select styles */
+.custom-select {
+    position: relative;
+    font-family: Arial;
+}
+
+.custom-select select {
+    display: none;
+}
+
+.select-selected {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border: 1px solid var(--secondary-color);
+    cursor: pointer;
+    user-select: none;
+}
+
+.select-selected:after {
+    position: absolute;
+    content: "";
+    top: 14px;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: var(--text-color) transparent transparent transparent;
+}
+
+.select-selected.select-arrow-active:after {
+    border-color: transparent transparent var(--text-color) transparent;
+    top: 7px;
+}
+
+.select-items div, .select-selected {
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+    cursor: pointer;
+    user-select: none;
+}
+
+.select-items {
+    position: absolute;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.select-hide {
+    display: none;
+}
+
+.select-items div:hover, .same-as-selected {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Add or update these styles */
+
+.form-select {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--input-bg);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    border: 1px solid var(--secondary-color);
+    border-radius: 0.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+html[data-theme="theme-dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.form-select option {
+    color: var(--text-color);
+    background-color: var(--input-bg);
+}
+
+/* Remove any custom-select related styles */
+.custom-select,
+.select-selected,
+.select-items {
+    /* Remove these styles */
+}
+
+/* Add these styles at the end of the file */
+
+/* Select2 Styles for both themes */
+.select2-container--bootstrap4 .select2-selection {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+    color: var(--text-color);
+}
+
+.select2-container--bootstrap4 .select2-dropdown {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+
+.select2-container--bootstrap4 .select2-results__option {
+    color: var(--text-color);
+    background-color: var(--input-bg);
+}
+
+.select2-container--bootstrap4 .select2-results__option[aria-selected=true] {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--button-color);
+    color: #ffffff;
+}
+
+.select2-search--dropdown .select2-search__field {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+/* Ensure the dropdown arrow is visible */
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--text-color) transparent transparent transparent;
+}
+
+.select2-container--bootstrap4.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent var(--text-color) transparent;
+}
+
+/* Standardize input field heights */
+.form-control,
+.form-select,
+.form-control[type="number"],
+.select2-container--bootstrap4 .select2-selection {
+    height: 38px;  /* Adjust this value as needed */
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Ensure select2 dropdown height matches other inputs */
+.select2-container--bootstrap4 .select2-selection--single {
+    height: 38px !important;  /* Use !important to override select2 default styles */
+    padding: 0.375rem 0.75rem;
+}
+
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+    line-height: 1.5;
+    padding-left: 0;
+}
+
+/* Adjust the dropdown arrow position for select2 */
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+/* Ensure native select elements also match the height */
+select.form-select {
+    height: 38px;
+    line-height: 1.5;
+}
+
+/* Adjust padding for number inputs to account for spinner */
+input[type="number"].form-control {
+    padding-right: 0.5rem;
+}
+
+/* Add these styles at the end of the file */
+
+/* Remove or comment out the existing modal styles */
+/*
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.modal-header {
+    border-bottom-color: var(--secondary-color);
+}
+
+.modal-footer {
+    border-top-color: var(--secondary-color);
+}
+
+.modal-header .btn-close {
+    color: var(--text-color);
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+*/
+
+/* Add these new styles */
+.modal-content.bg-dark {
+    background-color: #343a40 !important;
+}
+
+.modal-content.bg-dark .modal-header,
+.modal-content.bg-dark .modal-footer {
+    border-color: #495057;
+}
+
+.modal-content.bg-dark .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.modal-content.bg-dark .form-control,
+.modal-content.bg-dark .form-select {
+    background-color: #495057;
+    color: #fff;
+    border-color: #6c757d;
+}
+
+.modal-content.bg-dark .form-control:focus,
+.modal-content.bg-dark .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.modal-content.bg-dark label {
+    color: #fff;
+}
+
+/* Add these styles for the modal */
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.modal-header {
+    border-bottom-color: var(--secondary-color);
+}
+
+.modal-footer {
+    border-top-color: var(--secondary-color);
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+
+/* Style for the close button in dark mode */
+html[data-theme="theme-dark"] .modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Remove any conflicting styles */
+.modal-content.bg-dark,
+.modal-content.bg-light {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Dashboard styles */
+.card {
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
+
+.list-group-item {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+}
+
+/* Add these styles at the end of the file */
+
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 34px;
+    position: relative;
+    width: 60px;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+}
+
+.slider:before {
+    background-color: #fff;
+    bottom: 4px;
+    content: "";
+    height: 26px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 26px;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.slider .fa-sun {
+    color: #f39c12;
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    transition: .4s;
+    opacity: 1;
+}
+
+.slider .fa-moon {
+    color: #f1c40f;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    transition: .4s;
+    opacity: 0;
+}
+
+input:checked + .slider .fa-sun {
+    opacity: 0;
+}
+
+input:checked + .slider .fa-moon {
+    opacity: 1;
+}
+
+.theme-label {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+/* Add these styles at the end of the file */
+
+.color-schemes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.color-scheme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.color-scheme-option:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.color-scheme-option.active {
+    border-color: var(--primary-color);
+}
+
+.color-preview {
+    display: flex;
+    width: 80px;
+    height: 40px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.color-swatch {
+    flex: 1;
+    height: 100%;
+}
+
+.color-scheme-option span {
+    font-size: 12px;
+    text-align: center;
+}
+

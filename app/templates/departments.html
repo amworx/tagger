@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Departments</h2>
+<a href="{{ url_for('main.add_department') }}" class="btn btn-primary">Add Department</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Code</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for department in departments %}
+        <tr>
+            <td>{{ department.id }}</td>
+            <td>{{ department.title }}</td>
+            <td>{{ department.code }}</td>
+            <td>
+                <a href="{{ url_for('main.edit_department', id=department.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{{ url_for('main.delete_department', id=department.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this department?')">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

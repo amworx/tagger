@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Tag{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Generate Tag</h2>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <form id="tag-form" method="POST">
+                    <div class="mb-3">
+                        <label for="asset_category" class="form-label">Asset Category:</label>
+                        <select id="asset_category" name="asset_category" class="form-select" required>
+                            <option value="office" {% if form and form.asset_category == 'office' %}selected{% endif %}>Office Asset</option>
+                            <option value="employee" {% if form and form.asset_category == 'employee' %}selected{% endif %}>Employee-held Asset</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="asset_number" class="form-label">Asset Number:</label>
+                        <input type="number" id="asset_number" name="asset_number" class="form-control" min="0" max="9999" required value="{{ form.asset_number if form else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="asset_type" class="form-label">Asset Type:</label>
+                        <select id="asset_type" name="asset_type" class="form-select" required>
+                            <option value="">Select Asset Type</option>
+                            {% for asset_type in asset_types %}
+                            <option value="{{ asset_type.code }}" {% if form and form.asset_type == asset_type.code %}selected{% endif %}>{{ asset_type.title }} ({{ asset_type.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="office-fields">
+                        <div class="mb-3">
+                            <label for="building" class="form-label">Building:</label>
+                            <select name="building" id="building" class="form-select" required>
+                                <option value="">Select Building</option>
+                                {% for building in buildings %}
+                                <option value="{{ building.code }}" {% if form and form.building == building.code %}selected{% endif %}>{{ building.title }} ({{ building.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="room_number" class="form-label">Room Number:</label>
+                            <input type="number" id="room_number" name="room_number" class="form-control" min="1" max="999" value="{{ form.room_number if form else '' }}">
+                        </div>
+                    </div>
+                    <div id="employee-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="department" class="form-label">Department:</label>
+                            <select id="department" name="department" class="form-select">
+                                <option value="">Select Department</option>
+                                {% for department in departments %}
+                                <option value="{{ department.code }}" {% if form and form.department == department.code %}selected{% endif %}>{{ department.title }} ({{ department.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_id" class="form-label">Employee ID:</label>
+                            <input type="number" id="employee_id" name="employee_id" class="form-control" min="1" max="999" value="{{ form.employee_id if form else '' }}">
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-primary">Generate Tag</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-12 col-md-6 mt-4 mt-md-0">
+                <div id="result" class="mt-4">
+                    <h3>Generated Tag:</h3>
+                    {% if generated_tag %}
+                    <div class="generated-tag-container">
+                        <p id="generated-tag" class="generated-tag">{{ generated_tag }}</p>
+                        <button onclick="copyToClipboard()" class="btn btn-sm btn-secondary copy-btn">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    {% if success_message %}
+                    <div class="alert alert-success mt-3">{{ success_message }}</div>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted">No tag generated yet. Fill the form and click "Generate Tag".</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const assetCategory = document.getElementById('asset_category');
+    const officeFields = document.getElementById('office-fields');
+    const employeeFields = document.getElementById('employee-fields');
+    
+    function toggleFields() {
+        if (assetCategory.value === 'office') {
+            officeFields.style.display = 'block';
+            employeeFields.style.display = 'none';
+        } else {
+            officeFields.style.display = 'none';
+            employeeFields.style.display = 'block';
+        }
+    }
+    
+    assetCategory.addEventListener('change', toggleFields);
+    toggleFields(); // Call once to set initial state
+
+    // Initialize select2 for dropdowns
+    $('#asset_type, #building, #department').select2({
+        theme: 'bootstrap4',
+        width: '100%',
+        dropdownParent: $('body')
+    });
+
+    // Update Select2 container when theme changes
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                $('.select2-container--bootstrap4').remove();
+                $('#asset_type, #building, #department').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    dropdownParent: $('body')
+                });
+            }
+        });
+    });
+
+    observer.observe(htmlElement, { attributes: true });
+});
+
+function copyToClipboard() {
+    const tagElement = document.getElementById('generated-tag');
+    const tagText = tagElement.innerText;
+    
+    navigator.clipboard.writeText(tagText).then(function() {
+        alert('Tag copied to clipboard!');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+</script>
+{% endblock %}
+
+{% endblock %}
