@@ -142,3 +142,104 @@ class Setting(db.Model):
 event.listen(AssetType.code, 'set', AssetType._uppercase_code, retval=True)
 event.listen(Building.code, 'set', Building._uppercase_code, retval=True)
 event.listen(Department.code, 'set', Department._uppercase_code, retval=True)
+
+class PermissionType(Enum):
+    READ = 'read'
+    WRITE = 'write'
+    DELETE = 'delete'
+    MANAGE = 'manage'
+
+class Resource(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)  # e.g., 'settings', 'users', 'database_ops'
+    description = db.Column(db.String(200))
+
+class PermissionGroup(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.String(200))
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    permissions = db.relationship('Permission', secondary='group_permissions')
+    users = db.relationship('User', secondary='user_groups')
+
+class Permission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    resource_id = db.Column(db.Integer, db.ForeignKey('resource.id'), nullable=False)
+    permission_type = db.Column(db.Enum(PermissionType), nullable=False)
+    
+    resource = db.relationship('Resource')
+
+    def __repr__(self):
+        return f'<Permission {self.resource.name}:{self.permission_type.value}>'
+
+class RolePermission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(20), nullable=False)  # References UserRole
+    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id'), nullable=False)
+
+class UserPermission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id'), nullable=False)
+    granted_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    granted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PermissionAudit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # User affected
+    actor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # User making the change
+    action = db.Column(db.String(50), nullable=False)  # 'grant', 'revoke', 'modify'
+    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('permission_group.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    details = db.Column(db.Text)  # JSON string with additional details
+
+# Association tables
+group_permissions = db.Table('group_permissions',
+    db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id')),
+    db.Column('permission_id', db.Integer, db.ForeignKey('permission.id'))
+)
+
+user_groups = db.Table('user_groups',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id'))
+)
+
+# Add these to your existing User model
+class User(UserMixin, db.Model):
+    # ... (existing fields)
+    
+    permissions = db.relationship('Permission', secondary='user_permission')
+    groups = db.relationship('PermissionGroup', secondary='user_groups')
+    
+    def has_permission(self, resource_name, permission_type):
+        """Check if user has specific permission"""
+        # Check direct user permissions
+        for perm in self.permissions:
+            if perm.resource.name == resource_name and perm.permission_type == permission_type:
+                return True
+                
+        # Check group permissions
+        for group in self.groups:
+            for perm in group.permissions:
+                if perm.resource.name == resource_name and perm.permission_type == permission_type:
+                    return True
+                    
+        # Check role-based permissions
+        role_perms = RolePermission.query.filter_by(role=self.role).all()
+        for role_perm in role_perms:
+            perm = role_perm.permission
+            if perm.resource.name == resource_name and perm.permission_type == permission_type:
+                return True
+                
+        return False
+
+    def can_manage_user(self, target_user):
+        """Check if user can manage another user"""
+        if self.is_superadmin():
+            return True
+        if self.is_admin():
+            return not target_user.is_admin() and not target_user.is_superadmin()
+        return False

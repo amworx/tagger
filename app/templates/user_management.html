@@ -8,6 +8,7 @@
                 <th>Username</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Permissions</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -17,6 +18,12 @@
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.role.name }}</td>
+                <td>
+                    <a href="{{ url_for('permissions.manage_user_permissions', user_id=user.id) }}" 
+                       class="btn btn-sm btn-info">
+                        <i class="fas fa-key"></i> Manage Permissions
+                    </a>
+                </td>
                 <td>
                     <a href="{{ url_for('main.edit_user', user_id=user.id) }}" class="btn btn-sm btn-primary">Edit</a>
                     <form action="{{ url_for('main.delete_user', user_id=user.id) }}" method="POST" style="display: inline;">

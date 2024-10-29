@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Permissions - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Manage Permissions - {{ user.username }}</h2>
+        <p class="text-muted">Role: {{ user.role }}</p>
+
+        <form id="permissions-form" method="POST" action="{{ url_for('permissions.update_permissions') }}">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            
+            <div class="row">
+                <!-- Direct Permissions -->
+                <div class="col-md-6">
+                    <h3>Direct Permissions</h3>
+                    {% for resource in resources %}
+                    <div class="permission-group mb-3">
+                        <h5>{{ resource.name|title }}</h5>
+                        <p class="text-muted small">{{ resource.description }}</p>
+                        {% for ptype in PermissionType %}
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   name="permissions" 
+                                   value="{{ resource.id }}_{{ ptype.value }}"
+                                   id="perm_{{ resource.id }}_{{ ptype.value }}"
+                                   {% if user.has_permission(resource.name, ptype) %}checked{% endif %}
+                                   {% if not current_user.has_permission(resource.name, ptype) %}disabled{% endif %}>
+                            <label class="form-check-label" for="perm_{{ resource.id }}_{{ ptype.value }}">
+                                {{ ptype.value|title }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Permission Groups -->
+                <div class="col-md-6">
+                    <h3>Permission Groups</h3>
+                    {% for group in groups %}
+                    <div class="form-check mb-2">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               name="groups" 
+                               value="{{ group.id }}"
+                               id="group_{{ group.id }}"
+                               {% if group in user.groups %}checked{% endif %}>
+                        <label class="form-check-label" for="group_{{ group.id }}">
+                            {{ group.name }}
+                            <small class="text-muted d-block">{{ group.description }}</small>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('main.user_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Permission Audit Log -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h3>Permission Change History</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Action</th>
+                        <th>Changed By</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for audit in permission_audits %}
+                    <tr>
+                        <td>{{ audit.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ audit.action|title }}</td>
+                        <td>{{ audit.actor.username }}</td>
+                        <td>{{ audit.details }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.getElementById('permissions-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Permissions updated successfully', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showAlert(data.error || 'An error occurred', 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('An error occurred', 'danger');
+        console.error('Error:', error);
+    });
+});
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+}
+</script>
+{% endblock %}
+{% endblock %} 

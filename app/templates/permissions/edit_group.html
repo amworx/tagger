@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Permission Group - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Edit Permission Group</h2>
+        <form method="POST" id="edit-group-form">
+            <div class="mb-3">
+                <label for="name" class="form-label">Group Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ group.name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ group.description }}</textarea>
+            </div>
+
+            <div class="row">
+                {% for resource in resources %}
+                <div class="col-md-6 mb-4">
+                    <div class="permission-section">
+                        <h4>{{ resource.name|title }}</h4>
+                        <p class="text-muted small">{{ resource.description }}</p>
+                        {% for ptype in PermissionType %}
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   name="permissions" 
+                                   value="{{ resource.id }}_{{ ptype.value }}"
+                                   id="perm_{{ resource.id }}_{{ ptype.value }}"
+                                   {% if group.has_permission(resource.name, ptype) %}checked{% endif %}
+                                   {% if not current_user.has_permission(resource.name, ptype) %}disabled{% endif %}>
+                            <label class="form-check-label" for="perm_{{ resource.id }}_{{ ptype.value }}">
+                                {{ ptype.value|title }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('permissions.permission_groups') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.getElementById('edit-group-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Group updated successfully', 'success');
+            setTimeout(() => window.location.href = "{{ url_for('permissions.permission_groups') }}", 1500);
+        } else {
+            showAlert(data.error || 'An error occurred', 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('An error occurred', 'danger');
+        console.error('Error:', error);
+    });
+});
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+}
+</script>
+{% endblock %}
+{% endblock %} 

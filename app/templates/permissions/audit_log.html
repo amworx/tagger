@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Permission Audit Log{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Permission Audit Log</h2>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action By</th>
+                        <th>Action</th>
+                        <th>Resource</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for audit in audits %}
+                    <tr>
+                        <td>{{ audit.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ audit.user.username }}</td>
+                        <td>{{ audit.actor.username }}</td>
+                        <td>{{ audit.action|title }}</td>
+                        <td>
+                            {% if audit.permission %}
+                                {{ audit.permission.resource.name|title }}
+                            {% elif audit.group %}
+                                Group: {{ audit.group.name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-info" 
+                                    onclick="showDetails('{{ audit.details|tojson }}')">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                        <li class="page-item {% if page == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('permissions.audit_log', page=page) }}">
+                                {{ page }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="detailsContent"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function showDetails(details) {
+    const detailsObj = JSON.parse(details);
+    const formattedDetails = JSON.stringify(detailsObj, null, 2);
+    document.getElementById('detailsContent').textContent = formattedDetails;
+    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+}
+</script>
+{% endblock %}
+{% endblock %} 
