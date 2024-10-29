@@ -14,7 +14,6 @@ import zipfile
 from werkzeug.security import generate_password_hash
 from flask import Flask
 import tempfile
-from functools import wraps
 
 bp = Blueprint('main', __name__)
 
@@ -156,7 +155,6 @@ def generate_tag():
 # CRUD routes for AssetType
 @bp.route('/asset_types')
 @login_required
-@permission_required(Permission.ACCESS_ASSET_TYPES)
 def asset_type_list():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -795,6 +793,7 @@ def user_list():
                 User.email.ilike(f'%{search_query}%'),
                 User.role.ilike(f'%{search_query}%')
             )
+        )
 
     if hasattr(User, sort):
         sort_column = getattr(User, sort)
@@ -1007,52 +1006,4 @@ def generic_list(model_name):
                          form=form,
                          max=max,  # Add built-in max function
                          min=min)  # Add built-in min function
-
-@bp.route('/permissions', methods=['GET', 'POST'])
-@login_required
-def permissions_management():
-    if not current_user.is_superadmin():
-        flash('Access denied. Only superadmin can manage permissions.', 'danger')
-        return redirect(url_for('main.index'))
-    
-    roles = UserRole.query.all()
-    selected_role_id = request.args.get('role_id', type=int)
-    selected_role = UserRole.query.get(selected_role_id) if selected_role_id else None
-    
-    # Split permissions into categories
-    page_permissions = [p for p in Permission if p.value.startswith('access_')]
-    action_permissions = [p for p in Permission if not p.value.startswith('access_')]
-    
-    class PermissionsForm(FlaskForm):
-        permissions = SelectMultipleField('Permissions', choices=[(p.value, p.value) for p in Permission])
-    
-    form = PermissionsForm()
-    
-    if form.validate_on_submit() and selected_role and selected_role.name != 'superadmin':
-        # Update permissions
-        RolePermission.query.filter_by(role_id=selected_role.id).delete()
-        for permission in form.permissions.data:
-            role_permission = RolePermission(role_id=selected_role.id, permission=permission)
-            db.session.add(role_permission)
-        db.session.commit()
-        flash('Permissions updated successfully', 'success')
-        return redirect(url_for('main.permissions_management', role_id=selected_role.id))
-    
-    return render_template('permissions_management.html',
-                         roles=roles,
-                         selected_role=selected_role,
-                         page_permissions=page_permissions,
-                         action_permissions=action_permissions,
-                         form=form)
-
-def permission_required(permission):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not current_user.role.has_permission(permission):
-                flash('Access denied. You do not have the required permission.', 'danger')
-                return redirect(url_for('main.index'))
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
 
