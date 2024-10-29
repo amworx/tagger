@@ -40,11 +40,13 @@
                             <i class="fas fa-plus-circle"></i> <span class="sidebar-text">Generate Tag</span>
                         </a>
                     </li>
+                    {% if current_user.role.has_permission('access_asset_types') %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.asset_type_list' %}active{% endif %}" href="{{ url_for('main.asset_type_list') }}">
                             <i class="fas fa-cubes"></i> <span class="sidebar-text">Asset Types</span>
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.building_list' %}active{% endif %}" href="{{ url_for('main.building_list') }}">
                             <i class="fas fa-building"></i> <span class="sidebar-text">Buildings</span>

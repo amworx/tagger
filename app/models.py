@@ -108,10 +108,18 @@ class Department(BaseModel):
         if not self.code.endswith('D'):
             raise ValueError("Department code must end with 'D'")
 
-class UserRole:
-    SUPERADMIN = 'superadmin'
-    ADMIN = 'admin'
-    USER = 'user'
+class UserRole(db.Model):
+    __tablename__ = 'user_role'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.String(200))
+    permissions = db.relationship('RolePermission', backref='role', lazy=True)
+    
+    def has_permission(self, permission):
+        if isinstance(permission, Permission):
+            permission = permission.value
+        return any(p.permission == permission for p in self.permissions)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -137,6 +145,49 @@ class Setting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(64), unique=True, nullable=False)
     value = db.Column(db.String(256))
+
+class Permission(Enum):
+    # Page Access Permissions
+    ACCESS_DASHBOARD = "access_dashboard"
+    ACCESS_GENERATE_TAG = "access_generate_tag"
+    ACCESS_ASSET_TYPES = "access_asset_types"
+    ACCESS_BUILDINGS = "access_buildings"
+    ACCESS_DEPARTMENTS = "access_departments"
+    ACCESS_USER_MANAGEMENT = "access_user_management"
+    ACCESS_DATABASE_OPS = "access_database_operations"
+    ACCESS_SETTINGS = "access_settings"
+    
+    # Action Permissions
+    CREATE_ASSET_TYPE = "create_asset_type"
+    EDIT_ASSET_TYPE = "edit_asset_type"
+    DELETE_ASSET_TYPE = "delete_asset_type"
+    
+    CREATE_BUILDING = "create_building"
+    EDIT_BUILDING = "edit_building"
+    DELETE_BUILDING = "delete_building"
+    
+    CREATE_DEPARTMENT = "create_department"
+    EDIT_DEPARTMENT = "edit_department"
+    DELETE_DEPARTMENT = "delete_department"
+    
+    CREATE_USER = "create_user"
+    EDIT_USER = "edit_user"
+    DELETE_USER = "delete_user"
+    
+    IMPORT_DATA = "import_data"
+    EXPORT_DATA = "export_data"
+    BACKUP_DATABASE = "backup_database"
+    RESTORE_DATABASE = "restore_database"
+
+class RolePermission(db.Model):
+    __tablename__ = 'role_permissions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False)
+    permission = db.Column(db.String(50), nullable=False)
+    
+    def __repr__(self):
+        return f'<RolePermission {self.role_id}:{self.permission}>'
 
 # Set up event listeners for each model
 event.listen(AssetType.code, 'set', AssetType._uppercase_code, retval=True)
