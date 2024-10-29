@@ -15,7 +15,10 @@ def login():
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.find_by_username_or_email(form.login.data)
+        user = User.query.filter(
+            (User.username == form.login.data) | 
+            (User.email == form.login.data)
+        ).first()
         if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')

@@ -120,6 +120,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role = db.Column(db.String(20), default=UserRole.USER)
 
+    # Relationships
+    permissions = db.relationship('Permission', secondary='user_permission')
+    groups = db.relationship('PermissionGroup', secondary='user_groups')
+
     def is_superadmin(self):
         return self.role == UserRole.SUPERADMIN
 
@@ -132,6 +136,40 @@ class User(UserMixin, db.Model):
     @classmethod
     def find_by_username_or_email(cls, login):
         return cls.query.filter((cls.username == login) | (cls.email == login)).first()
+
+    def has_permission(self, resource_name, permission_type):
+        """Check if user has specific permission"""
+        # Superadmin has all permissions
+        if self.is_superadmin():
+            return True
+
+        # Check direct user permissions
+        for perm in self.permissions:
+            if perm.resource.name == resource_name and perm.permission_type == permission_type:
+                return True
+                
+        # Check group permissions
+        for group in self.groups:
+            for perm in group.permissions:
+                if perm.resource.name == resource_name and perm.permission_type == permission_type:
+                    return True
+                    
+        # Check role-based permissions
+        role_perms = RolePermission.query.filter_by(role=self.role).all()
+        for role_perm in role_perms:
+            perm = role_perm.permission
+            if perm.resource.name == resource_name and perm.permission_type == permission_type:
+                return True
+                
+        return False
+
+    def can_manage_user(self, target_user):
+        """Check if user can manage another user"""
+        if self.is_superadmin():
+            return True
+        if self.is_admin():
+            return not target_user.is_admin() and not target_user.is_superadmin()
+        return False
 
 class Setting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -206,40 +244,3 @@ user_groups = db.Table('user_groups',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('group_id', db.Integer, db.ForeignKey('permission_group.id'))
 )
-
-# Add these to your existing User model
-class User(UserMixin, db.Model):
-    # ... (existing fields)
-    
-    permissions = db.relationship('Permission', secondary='user_permission')
-    groups = db.relationship('PermissionGroup', secondary='user_groups')
-    
-    def has_permission(self, resource_name, permission_type):
-        """Check if user has specific permission"""
-        # Check direct user permissions
-        for perm in self.permissions:
-            if perm.resource.name == resource_name and perm.permission_type == permission_type:
-                return True
-                
-        # Check group permissions
-        for group in self.groups:
-            for perm in group.permissions:
-                if perm.resource.name == resource_name and perm.permission_type == permission_type:
-                    return True
-                    
-        # Check role-based permissions
-        role_perms = RolePermission.query.filter_by(role=self.role).all()
-        for role_perm in role_perms:
-            perm = role_perm.permission
-            if perm.resource.name == resource_name and perm.permission_type == permission_type:
-                return True
-                
-        return False
-
-    def can_manage_user(self, target_user):
-        """Check if user can manage another user"""
-        if self.is_superadmin():
-            return True
-        if self.is_admin():
-            return not target_user.is_admin() and not target_user.is_superadmin()
-        return False
