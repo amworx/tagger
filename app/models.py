@@ -125,12 +125,12 @@ class User(UserMixin, db.Model):
         secondary='user_permission',
         primaryjoin="User.id==UserPermission.user_id",
         secondaryjoin="UserPermission.permission_id==Permission.id",
-        backref=db.backref('users', lazy='dynamic')
+        backref=db.backref('permission_users', lazy='dynamic')
     )
     
     groups = db.relationship('PermissionGroup',
         secondary='user_groups',
-        backref=db.backref('users', lazy='dynamic')
+        backref=db.backref('group_users', lazy='dynamic')
     )
 
     def is_superadmin(self):
@@ -208,8 +208,12 @@ class PermissionGroup(db.Model):
     created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    permissions = db.relationship('Permission', secondary='group_permissions')
-    users = db.relationship('User', secondary='user_groups')
+    permissions = db.relationship('Permission', 
+        secondary='group_permissions',
+        backref=db.backref('permission_groups', lazy='dynamic')
+    )
+
+    created_by = db.relationship('User', foreign_keys=[created_by_id])
 
 class Permission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
