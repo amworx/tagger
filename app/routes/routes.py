@@ -58,11 +58,35 @@ def generate_tag():
             if asset_category == 'office':
                 building = request.form['building']
                 room_number = request.form['room_number']
+                
+                if not room_number:
+                    raise ValueError('Room Number is required for office assets')
+                
+                # Validate inputs - allow zero for room_number
+                if not (0 <= int(asset_number) <= 9999):
+                    raise ValueError('Asset Number must be between 0 and 9999')
+                if not (0 <= int(room_number) <= 999):
+                    raise ValueError('Room Number must be between 0 and 999')
+                
+                # Generate tag
                 tag = f"{int(asset_number):04d}-{asset_type}-{building}-RN{int(room_number):03d}"
+            
             elif asset_category == 'employee':
                 department = request.form['department']
                 employee_id = request.form['employee_id']
+                
+                if not employee_id:
+                    raise ValueError('Employee ID is required for employee-held assets')
+                
+                # Validate inputs - allow zero for employee_id
+                if not (0 <= int(asset_number) <= 9999):
+                    raise ValueError('Asset Number must be between 0 and 9999')
+                if not (0 <= int(employee_id) <= 999):
+                    raise ValueError('Employee ID must be between 0 and 999')
+                
+                # Generate tag
                 tag = f"{int(asset_number):04d}-{asset_type}-{department}-ID{int(employee_id):03d}"
+            
             else:
                 raise ValueError('Invalid asset category')
             
@@ -73,13 +97,19 @@ def generate_tag():
                                generated_tag=tag,
                                success_message="Tag generated successfully!",
                                form=request.form)
+        
         except ValueError as e:
             flash(str(e), 'error')
+            return render_template('generate_tag.html', 
+                               asset_types=asset_types, 
+                               buildings=buildings, 
+                               departments=departments,
+                               form=request.form)
     
     return render_template('generate_tag.html', 
-                         asset_types=asset_types,
-                         buildings=buildings,
-                         departments=departments)
+                       asset_types=asset_types, 
+                       buildings=buildings, 
+                       departments=departments)
 
 @bp.route('/asset_type_list')
 @login_required

@@ -46,7 +46,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="room_number" class="form-label">Room Number:</label>
-                            <input type="number" id="room_number" name="room_number" class="form-control" min="1" max="999" value="{{ form.room_number if form else '' }}">
+                            <input type="number" id="room_number" name="room_number" class="form-control" min="0" max="999" value="{{ form.room_number if form else '' }}">
                         </div>
                     </div>
                     <div id="employee-fields" style="display: none;">
@@ -61,7 +61,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="employee_id" class="form-label">Employee ID:</label>
-                            <input type="number" id="employee_id" name="employee_id" class="form-control" min="1" max="999" value="{{ form.employee_id if form else '' }}">
+                            <input type="number" id="employee_id" name="employee_id" class="form-control" min="0" max="999" value="{{ form.employee_id if form else '' }}">
                         </div>
                     </div>
                     <div class="text-center mt-3">
